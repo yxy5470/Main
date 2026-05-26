@@ -1,87 +1,134 @@
-export function MapCard() {
-  const markers = [
-    { id: 1, lat: 30, lng: 30, status: 'normal', name: '北京数据中心' },
-    { id: 2, lat: 50, lng: 40, status: 'alert', name: '上海工厂' },
-    { id: 3, lat: 60, lng: 70, status: 'normal', name: '深圳园区' },
-    { id: 4, lat: 40, lng: 60, status: 'normal', name: '成都基地' },
-    { id: 5, lat: 25, lng: 50, status: 'alert', name: '广州站点' },
-    { id: 6, lat: 70, lng: 35, status: 'normal', name: '杭州中心' },
-    { id: 7, lat: 45, lng: 25, status: 'normal', name: '南京工厂' },
-    { id: 8, lat: 55, lng: 55, status: 'alert', name: '武汉基地' },
-  ];
+import { Plus, Minus, MapPin } from 'lucide-react';
 
+export function MapCard() {
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-border overflow-hidden">
-      <div className="px-6 py-4 border-b border-border">
-        <h3 className="text-lg font-medium">项目态势分布</h3>
+    <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden relative" style={{ height: 'calc(100vh - 280px)' }}>
+      {/* 地图背景层 - 模拟浅色科技风格地图 */}
+      <div className="absolute inset-0 bg-[#E8EDF2]">
+        {/* 模拟水系 */}
+        <svg className="absolute inset-0 w-full h-full opacity-30">
+          <path
+            d="M 100 300 Q 200 250 400 280 T 800 300 L 800 400 L 100 400 Z"
+            fill="#A3D5FF"
+            opacity="0.4"
+          />
+          <path
+            d="M 500 100 Q 600 120 700 100 T 900 110 L 900 200 L 500 180 Z"
+            fill="#A3D5FF"
+            opacity="0.3"
+          />
+        </svg>
+
+        {/* 模拟路网 */}
+        <svg className="absolute inset-0 w-full h-full">
+          {/* 水平道路 */}
+          <line x1="0" y1="200" x2="100%" y2="200" stroke="#C5CAD1" strokeWidth="1" opacity="0.5" />
+          <line x1="0" y1="400" x2="100%" y2="400" stroke="#C5CAD1" strokeWidth="1" opacity="0.5" />
+          <line x1="0" y1="600" x2="100%" y2="600" stroke="#C5CAD1" strokeWidth="1" opacity="0.5" />
+
+          {/* 垂直道路 */}
+          <line x1="300" y1="0" x2="300" y2="100%" stroke="#C5CAD1" strokeWidth="1" opacity="0.5" />
+          <line x1="600" y1="0" x2="600" y2="100%" stroke="#C5CAD1" strokeWidth="1" opacity="0.5" />
+          <line x1="900" y1="0" x2="900" y2="100%" stroke="#C5CAD1" strokeWidth="1" opacity="0.5" />
+          <line x1="1200" y1="0" x2="1200" y2="100%" stroke="#C5CAD1" strokeWidth="1" opacity="0.5" />
+        </svg>
+
+        {/* 网格纹理 */}
+        <div className="absolute inset-0" style={{
+          backgroundImage: `
+            linear-gradient(0deg, transparent 24%, rgba(197, 202, 209, 0.05) 25%, rgba(197, 202, 209, 0.05) 26%, transparent 27%, transparent 74%, rgba(197, 202, 209, 0.05) 75%, rgba(197, 202, 209, 0.05) 76%, transparent 77%, transparent),
+            linear-gradient(90deg, transparent 24%, rgba(197, 202, 209, 0.05) 25%, rgba(197, 202, 209, 0.05) 26%, transparent 27%, transparent 74%, rgba(197, 202, 209, 0.05) 75%, rgba(197, 202, 209, 0.05) 76%, transparent 77%, transparent)
+          `,
+          backgroundSize: '50px 50px',
+        }}></div>
       </div>
 
-      <div className="p-6">
-        <div className="relative w-full h-[400px] bg-slate-50 rounded-lg overflow-hidden">
-          <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice">
-            <defs>
-              <pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse">
-                <path d="M 10 0 L 0 0 0 10" fill="none" stroke="#e2e8f0" strokeWidth="0.2" />
-              </pattern>
-            </defs>
+      {/* 点聚合标记 - 左侧 */}
+      <div className="absolute" style={{ left: '20%', top: '35%' }}>
+        <div className="relative">
+          {/* 光晕效果 */}
+          <div className="absolute inset-0 rounded-full bg-blue-400 opacity-20 animate-ping" style={{ width: '60px', height: '60px', top: '-10px', left: '-10px' }}></div>
 
-            <rect width="100" height="100" fill="#f8fafc" />
-            <rect width="100" height="100" fill="url(#grid)" />
+          {/* 聚合圆圈 */}
+          <div className="relative w-10 h-10 bg-[#3B82F6] rounded-full flex items-center justify-center shadow-lg border-2 border-white">
+            <span className="text-white font-semibold text-sm">12</span>
+          </div>
+        </div>
+      </div>
 
-            <path
-              d="M 15,30 Q 20,25 25,28 L 30,25 Q 35,27 40,30 L 45,28 Q 50,25 55,27 L 60,30 Q 65,28 70,32 L 75,30 Q 80,27 85,30"
-              fill="none"
-              stroke="#cbd5e1"
-              strokeWidth="0.3"
-            />
+      {/* 点聚合标记 - 右上角 */}
+      <div className="absolute" style={{ right: '15%', top: '20%' }}>
+        <div className="relative">
+          {/* 光晕效果 */}
+          <div className="absolute inset-0 rounded-full bg-blue-400 opacity-20 animate-ping" style={{ width: '70px', height: '70px', top: '-15px', left: '-15px' }}></div>
 
-            <path
-              d="M 10,40 Q 20,42 30,45 L 40,43 Q 50,46 60,44 L 70,47 Q 80,45 90,48"
-              fill="none"
-              stroke="#cbd5e1"
-              strokeWidth="0.3"
-            />
+          {/* 聚合圆圈 */}
+          <div className="relative w-12 h-12 bg-[#3B82F6] rounded-full flex items-center justify-center shadow-lg border-2 border-white">
+            <span className="text-white font-semibold text-base">45</span>
+          </div>
+        </div>
+      </div>
 
-            <ellipse cx="40" cy="60" rx="8" ry="6" fill="#e0f2fe" fillOpacity="0.3" />
-            <ellipse cx="65" cy="45" rx="6" ry="5" fill="#e0f2fe" fillOpacity="0.3" />
+      {/* 中心定位图钉和信息面板 */}
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+        {/* 信息弹窗 - 在图钉上方 */}
+        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2">
+          <div className="bg-white rounded-lg shadow-xl border border-slate-200 p-4 min-w-[280px]">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-slate-500">监测点位名称：</span>
+                <span className="text-slate-900 font-medium">观测场1号</span>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-slate-500">S/N：</span>
+                <span className="text-slate-900 font-medium">CR120251120001</span>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-slate-500">TNS/IMEI：</span>
+                <span className="text-slate-900 font-medium">868381079719402</span>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-slate-500">定位方式：</span>
+                <span className="text-slate-900 font-medium">自动定位</span>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-slate-500">经度：</span>
+                <span className="text-slate-900 font-medium">103.990207</span>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-slate-500">纬度：</span>
+                <span className="text-slate-900 font-medium">30.774069</span>
+              </div>
+            </div>
 
-            {markers.map((marker) => (
-              <g key={marker.id}>
-                <circle
-                  cx={marker.lng}
-                  cy={marker.lat}
-                  r="2.5"
-                  fill={marker.status === 'alert' ? '#ef4444' : '#10b981'}
-                  className="drop-shadow-md"
-                  opacity="0.9"
-                >
-                  <animate
-                    attributeName="r"
-                    values="2.5;3.5;2.5"
-                    dur="2s"
-                    repeatCount="indefinite"
-                  />
-                </circle>
-                <circle
-                  cx={marker.lng}
-                  cy={marker.lat}
-                  r="1.5"
-                  fill={marker.status === 'alert' ? '#fee2e2' : '#d1fae5'}
-                />
-              </g>
-            ))}
-          </svg>
+            {/* 弹窗小箭头 */}
+            <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-px">
+              <div className="w-3 h-3 bg-white border-r border-b border-slate-200 rotate-45"></div>
+            </div>
+          </div>
         </div>
 
-        <div className="mt-4 flex items-center gap-6 text-sm">
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-green-500"></div>
-            <span className="text-muted-foreground">正常运行</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-red-500"></div>
-            <span className="text-muted-foreground">告警状态</span>
-          </div>
+        {/* 红色图钉 */}
+        <div className="relative">
+          <MapPin className="w-10 h-10 text-red-500 fill-red-500 drop-shadow-lg" />
+        </div>
+      </div>
+
+      {/* 缩放控件 - 右下角 */}
+      <div className="absolute bottom-6 right-6 flex flex-col gap-1 bg-white rounded-lg shadow-lg border border-slate-200 overflow-hidden">
+        <button className="w-10 h-10 flex items-center justify-center hover:bg-slate-50 transition-colors border-b border-slate-200">
+          <Plus className="w-5 h-5 text-slate-700" />
+        </button>
+        <button className="w-10 h-10 flex items-center justify-center hover:bg-slate-50 transition-colors">
+          <Minus className="w-5 h-5 text-slate-700" />
+        </button>
+      </div>
+
+      {/* 地图图例/标签 */}
+      <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm rounded-lg shadow-md px-3 py-2 text-xs text-slate-600">
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 bg-[#3B82F6] rounded-full"></div>
+          <span>设备点位聚合</span>
         </div>
       </div>
     </div>

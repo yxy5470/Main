@@ -1,56 +1,103 @@
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { Bar } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ChartOptions,
+} from 'chart.js';
 
-const data = [
-  { name: '金堂水厂流量监测', count: 187 },
-  { name: '渠县闸门项目', count: 156 },
-  { name: '威远河口灌区', count: 142 },
-  { name: '空港水厂取水', count: 98 },
-  { name: '都江堰轨道交通', count: 76 },
-  { name: '唐源电气2026', count: 54 },
-  { name: '观测场', count: 32 },
-  { name: '德阳文庙项目', count: 18 },
-];
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+
+const chartData = {
+  labels: [
+    '金堂水厂流量监测',
+    '渠县闸门项目',
+    '威远河口灌区',
+    '空港水厂取水',
+    '都江堰轨道交通',
+    '唐源电气2026',
+    '观测场',
+    '德阳文庙项目',
+  ],
+  datasets: [
+    {
+      label: '告警次数',
+      data: [187, 156, 142, 98, 76, 54, 32, 18],
+      backgroundColor: '#3b82f6',
+      borderRadius: 6,
+      barThickness: 20,
+    },
+  ],
+};
+
+const options: ChartOptions<'bar'> = {
+  indexAxis: 'y',
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: {
+      display: false,
+    },
+    tooltip: {
+      backgroundColor: 'white',
+      titleColor: '#1f2937',
+      bodyColor: '#1f2937',
+      borderColor: '#e2e8f0',
+      borderWidth: 1,
+      padding: 12,
+      boxPadding: 6,
+      usePointStyle: true,
+      callbacks: {
+        label: (context) => `告警次数: ${context.parsed.x} 次`,
+      },
+    },
+  },
+  scales: {
+    x: {
+      grid: {
+        color: '#e2e8f0',
+        drawTicks: false,
+      },
+      border: {
+        display: false,
+      },
+      ticks: {
+        color: '#64748b',
+        font: {
+          size: 13,
+        },
+      },
+    },
+    y: {
+      grid: {
+        display: false,
+      },
+      border: {
+        display: false,
+      },
+      ticks: {
+        color: '#64748b',
+        font: {
+          size: 13,
+        },
+      },
+    },
+  },
+};
 
 export function AlertFrequencyChart() {
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col h-full">
-      <div className="px-6 py-4 border-b border-slate-200 flex-shrink-0">
+    <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden h-full flex flex-col">
+      <div className="px-6 py-4 border-b border-slate-200">
         <h3 className="text-lg font-semibold">各项目告警频次排行</h3>
       </div>
 
-      <div className="px-6 pb-6 pt-4 flex-1">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={data} layout="vertical" margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" horizontal={true} vertical={false} />
-            <XAxis
-              type="number"
-              tick={{ fontSize: 13, fill: '#64748b' }}
-            />
-            <YAxis
-              type="category"
-              dataKey="name"
-              tick={{ fontSize: 13, fill: '#64748b' }}
-              width={130}
-            />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: 'white',
-                border: '1px solid #e2e8f0',
-                borderRadius: '8px',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                fontSize: '14px',
-                padding: '12px'
-              }}
-              formatter={(value: number) => [`${value} 次`, '告警次数']}
-            />
-            <Bar
-              dataKey="count"
-              fill="#3b82f6"
-              radius={[0, 6, 6, 0]}
-              name="告警次数"
-            />
-          </BarChart>
-        </ResponsiveContainer>
+      <div className="px-6 pb-6 pt-4" style={{ height: 'calc(100% - 60px)' }}>
+        <Bar data={chartData} options={options} />
       </div>
     </div>
   );

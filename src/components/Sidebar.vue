@@ -1,14 +1,20 @@
 <template>
   <aside class="w-64 bg-[#1E293B] flex flex-col h-full">
     <div class="px-6 py-5 border-b border-slate-700">
-      <h2 class="text-xl font-semibold text-white">IoT Platform</h2>
+      <h2 class="text-xl font-semibold text-white">物联网监测管理平台</h2>
     </div>
 
     <nav class="flex-1 px-4 py-4">
       <div class="space-y-1">
         <a
           href="#"
-          class="flex items-center gap-3 px-4 py-3 rounded-lg bg-blue-600 text-white"
+          @click.prevent="$emit('navigate', 'home')"
+          :class="[
+            'flex items-center gap-3 px-4 py-3 rounded-lg transition-colors',
+            currentPage === 'home'
+              ? 'bg-blue-600 text-white'
+              : 'text-slate-300 hover:bg-slate-700 hover:text-white'
+          ]"
         >
           <Home :size="20" />
           <span class="text-base">首页</span>
@@ -16,7 +22,13 @@
 
         <a
           href="#"
-          class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition-colors"
+          @click.prevent="$emit('navigate', 'projects')"
+          :class="[
+            'flex items-center gap-3 px-4 py-3 rounded-lg transition-colors',
+            currentPage === 'projects'
+              ? 'bg-blue-600 text-white'
+              : 'text-slate-300 hover:bg-slate-700 hover:text-white'
+          ]"
         >
           <FolderOpen :size="20" />
           <span class="text-base">项目管理</span>
@@ -60,4 +72,13 @@
 
 <script setup>
 import { Home, Layers, Activity, Settings, Bell, FolderOpen } from 'lucide-vue-next'
+
+defineProps({
+  currentPage: {
+    type: String,
+    default: 'home'
+  }
+})
+
+defineEmits(['navigate'])
 </script>

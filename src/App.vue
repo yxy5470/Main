@@ -1,11 +1,12 @@
 <template>
   <div class="size-full flex bg-[#F3F4F6]">
-    <Sidebar />
+    <Sidebar :current-page="currentPage" @navigate="handleNavigate" />
 
     <div class="flex-1 flex flex-col min-w-0">
       <Header />
 
-      <main class="flex-1 overflow-auto px-8 py-6">
+      <!-- 首页内容 -->
+      <main v-if="currentPage === 'home'" class="flex-1 overflow-auto px-8 py-6">
         <div class="grid grid-cols-4 gap-6 mb-6">
           <StatCard title="项目总数" :value="68" />
           <StatCard title="接入设备总数" value="9,393" />
@@ -43,11 +44,15 @@
           </div>
         </div>
       </main>
+
+      <!-- 项目管理页面 -->
+      <ProjectManagement v-if="currentPage === 'projects'" />
     </div>
   </div>
 </template>
 
 <script setup>
+import { ref } from 'vue'
 import Sidebar from './components/Sidebar.vue'
 import Header from './components/Header.vue'
 import StatCard from './components/StatCard.vue'
@@ -55,4 +60,11 @@ import ProjectTable from './components/ProjectTable.vue'
 import AlertList from './components/AlertList.vue'
 import AlertFrequencyChart from './components/AlertFrequencyChart.vue'
 import DataTrendChart from './components/DataTrendChart.vue'
+import ProjectManagement from './components/ProjectManagement.vue'
+
+const currentPage = ref('home')
+
+const handleNavigate = (page) => {
+  currentPage.value = page
+}
 </script>

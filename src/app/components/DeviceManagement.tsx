@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Copy, ChevronDown, Plus, Upload, Download, X, Grid3x3, List, QrCode, Signal, Star, ChevronUp } from 'lucide-react';
+import { Copy, ChevronDown, Plus, Download, X, Grid3x3, List, Star, ChevronUp, AlertTriangle, ExternalLink } from 'lucide-react';
 import { TreeSelect } from './TreeSelect';
 
 interface Device {
@@ -14,19 +14,38 @@ interface Device {
   positionType: string;
   latitude: number;
   longitude: number;
+  accessProtocol: string;
+  pushProtocol: string;
 }
 
 type SortField = 'sn' | 'imei' | 'locationName' | 'productType' | 'project' | 'status';
 type SortOrder = 'asc' | 'desc';
 
 const initialDevices: Device[] = [
-  { id: 1, sn: 'CR120251120001', imei: '868381079719402', productType: '遥测终端机', project: '金堂水厂流量监测', locationName: '观测场1号', status: 'online', hasAlert: true, positionType: '自动定位', latitude: 30.774069, longitude: 103.990207 },
-  { id: 2, sn: 'SN-10024', imei: '860720050001235', productType: '数据采集器', project: '空港水厂取水监测', locationName: '水厂监测点A', status: 'online', hasAlert: false, positionType: '手动定位', latitude: 30.574069, longitude: 103.890207 },
-  { id: 3, sn: 'SN-10025', imei: '860720050001236', productType: '遥测终端机', project: '观测场气象监测', locationName: '气象站B', status: 'offline', hasAlert: false, positionType: '自动定位', latitude: 30.674069, longitude: 103.790207 },
-  { id: 4, sn: 'SN-10026', imei: '860720050001237', productType: '智能网关', project: '德阳文庙环境监测', locationName: '环境监测点C', status: 'online', hasAlert: true, positionType: '自动定位', latitude: 30.874069, longitude: 103.690207 },
-  { id: 5, sn: 'SN-10027', imei: '860720050001238', productType: '遥测终端机', project: '渠县闸门控制系统', locationName: '闸门控制点D', status: 'offline', hasAlert: false, positionType: '手动定位', latitude: 30.974069, longitude: 103.590207 },
-  { id: 6, sn: 'SN-10028', imei: '860720050001239', productType: '数据采集器', project: '都江堰轨道交通', locationName: '轨道站点E', status: 'online', hasAlert: false, positionType: '自动定位', latitude: 31.074069, longitude: 103.490207 },
+  { id: 1, sn: 'CR120251120001', imei: '868381079719402', productType: '遥测终端机', project: '金堂水厂流量监测', locationName: '观测场1号', status: 'online', hasAlert: true, positionType: '自动定位', latitude: 30.774069, longitude: 103.990207, accessProtocol: '四川水文规约', pushProtocol: 'MQTT' },
+  { id: 2, sn: 'SN-10024', imei: '860720050001235', productType: '数据采集器', project: '空港水厂取水监测', locationName: '水厂监测点A', status: 'online', hasAlert: false, positionType: '手动定位', latitude: 30.574069, longitude: 103.890207, accessProtocol: 'MQTT', pushProtocol: '私有协议' },
+  { id: 3, sn: 'SN-10025', imei: '860720050001236', productType: '遥测终端机', project: '观测场气象监测', locationName: '气象站B', status: 'offline', hasAlert: false, positionType: '自动定位', latitude: 30.674069, longitude: 103.790207, accessProtocol: 'SL651', pushProtocol: 'MQTT' },
+  { id: 4, sn: 'SN-10026', imei: '860720050001237', productType: '智能网关', project: '德阳文庙环境监测', locationName: '环境监测点C', status: 'online', hasAlert: true, positionType: '自动定位', latitude: 30.874069, longitude: 103.690207, accessProtocol: '私有协议', pushProtocol: '四川水文规约' },
+  { id: 5, sn: 'SN-10027', imei: '860720050001238', productType: '遥测终端机', project: '渠县闸门控制系统', locationName: '闸门控制点D', status: 'offline', hasAlert: false, positionType: '手动定位', latitude: 30.974069, longitude: 103.590207, accessProtocol: 'SL651', pushProtocol: 'SL651' },
+  { id: 6, sn: 'SN-10028', imei: '860720050001239', productType: '数据采集器', project: '都江堰轨道交通', locationName: '轨道站点E', status: 'online', hasAlert: false, positionType: '自动定位', latitude: 31.074069, longitude: 103.490207, accessProtocol: 'MQTT', pushProtocol: 'MQTT' },
 ];
+
+const PROTOCOL_STYLES: Record<string, { text: string; bg: string; border: string }> = {
+  'MQTT':       { text: '#096DD9', bg: '#E6F7FF', border: '#91D5FF' },
+  '私有协议':    { text: '#531DAB', bg: '#F9F0FF', border: '#D3ADF7' },
+  '四川水文规约': { text: '#006D75', bg: '#E6FFFB', border: '#87E8DE' },
+  'SL651':      { text: '#7D4E00', bg: '#FFF7E6', border: '#FFD591' },
+};
+
+function ProtocolTag({ value }: { value: string }) {
+  const s = PROTOCOL_STYLES[value] ?? { text: '#595959', bg: '#F5F5F5', border: '#D9D9D9' };
+  return (
+    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border whitespace-nowrap"
+      style={{ color: s.text, background: s.bg, borderColor: s.border }}>
+      {value}
+    </span>
+  );
+}
 
 export function DeviceManagement() {
   const [projectFilter, setProjectFilter] = useState('1-1');
@@ -41,7 +60,6 @@ export function DeviceManagement() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [showQrTooltip, setShowQrTooltip] = useState<number | null>(null);
   const [showMoreMenu, setShowMoreMenu] = useState<number | null>(null);
   const [showListMoreMenu, setShowListMoreMenu] = useState<number | null>(null);
   const [sortField, setSortField] = useState<SortField>('sn');
@@ -125,9 +143,9 @@ export function DeviceManagement() {
   const sortedDevices = getSortedDevices();
 
   return (
-    <div className="size-full bg-[#F3F4F6] overflow-auto px-8 py-6">
+    <div className="size-full bg-[#F3F4F6] flex flex-col px-8 py-6 overflow-hidden">
       {/* 顶部搜索筛选区卡片 */}
-      <div className="bg-white rounded shadow-sm border border-slate-200 p-4 mb-6">
+      <div className="flex-shrink-0 bg-white rounded shadow-sm border border-slate-200 p-4 mb-6">
         <div className="flex items-center gap-3">
           <TreeSelect
             data={projectTreeData}
@@ -204,7 +222,7 @@ export function DeviceManagement() {
       </div>
 
       {/* 数据表格/卡片卡片 */}
-      <div className="bg-white rounded shadow-sm border border-slate-200 overflow-hidden">
+      <div className="flex-1 min-h-0 bg-white rounded shadow-sm border border-slate-200 flex flex-col overflow-hidden">
         {/* 工具栏 */}
         <div className="px-6 py-3 border-b border-slate-200 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -292,131 +310,184 @@ export function DeviceManagement() {
 
         {/* 网格卡片视图 */}
         {viewMode === 'grid' && (
-          <div className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {sortedDevices.map((device) => (
-                <div
-                  key={device.id}
-                  className="bg-white rounded-lg shadow border border-slate-200 overflow-hidden hover:shadow-lg transition-shadow"
-                >
-                  {/* 第一层：卡片头部 */}
-                  <div className="p-4 flex items-start gap-3">
-                    {/* 左侧设备图标 */}
-                    <div className="w-14 h-14 bg-blue-50 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <div className="w-8 h-8 bg-[#3B82F6] rounded"></div>
+          <div className="flex-1 overflow-auto p-5">
+            <div className="grid grid-cols-3 gap-3">
+              {sortedDevices.map((device) => {
+                const online = device.status === 'online';
+                const offline = device.status === 'offline';
+                return (
+                  <div
+                    key={device.id}
+                    className={`bg-white rounded-lg flex flex-col overflow-hidden
+                      ${device.hasAlert ? 'border border-red-200 shadow-sm' : 'border border-slate-200 shadow-sm'}`}
+                  >
+                    {/* ── 1. 头部：设备图标 + 标题 + 右侧小图标 ── */}
+                    <div className="px-4 pt-4 pb-0 flex items-center gap-2.5">
+                      {/* 设备 icon */}
+                      <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0
+                        ${offline ? 'bg-slate-100' : 'bg-[#3B82F6]'}`}>
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                          <rect x="2" y="5" width="16" height="10" rx="2"
+                            fill={offline ? '#9CA3AF' : 'white'} fillOpacity="0.9" />
+                          <rect x="5" y="8" width="3" height="4" rx="0.5"
+                            fill={offline ? '#D1D5DB' : '#93C5FD'} />
+                          <rect x="9" y="8" width="3" height="4" rx="0.5"
+                            fill={offline ? '#D1D5DB' : '#93C5FD'} />
+                          <rect x="13" y="8" width="2" height="4" rx="0.5"
+                            fill={offline ? '#D1D5DB' : '#BFDBFE'} />
+                          <rect x="8" y="2" width="4" height="3" rx="1"
+                            fill={offline ? '#9CA3AF' : 'white'} fillOpacity="0.6" />
+                        </svg>
+                      </div>
+
+                      {/* 标题 */}
+                      <h4 className={`flex-1 min-w-0 flex items-center gap-1.5 font-bold truncate
+                        ${offline ? 'text-slate-400' : 'text-slate-900'}`}
+                        style={{ fontSize: '17px', lineHeight: '1.3' }}>
+                        <Star className={`w-4 h-4 flex-shrink-0
+                          ${offline ? 'text-slate-300 fill-slate-300' : 'text-yellow-500 fill-yellow-500'}`} />
+                        <span className="truncate">{device.locationName}</span>
+                      </h4>
+
+                      {/* 右侧：二维码 + 信号图标 */}
+                      <div className="flex items-center gap-2 flex-shrink-0 ml-1">
+                        <button className="text-slate-300 hover:text-slate-500 transition-colors" title="二维码">
+                          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                            <rect x="1" y="1" width="6" height="6" rx="0.8" stroke="currentColor" strokeWidth="1.2" fill="none" />
+                            <rect x="3" y="3" width="2" height="2" fill="currentColor" />
+                            <rect x="9" y="1" width="6" height="6" rx="0.8" stroke="currentColor" strokeWidth="1.2" fill="none" />
+                            <rect x="11" y="3" width="2" height="2" fill="currentColor" />
+                            <rect x="1" y="9" width="6" height="6" rx="0.8" stroke="currentColor" strokeWidth="1.2" fill="none" />
+                            <rect x="3" y="11" width="2" height="2" fill="currentColor" />
+                            <rect x="9" y="9" width="2" height="2" fill="currentColor" />
+                            <rect x="13" y="9" width="2" height="2" fill="currentColor" />
+                            <rect x="9" y="13" width="2" height="2" fill="currentColor" />
+                            <rect x="13" y="13" width="2" height="2" fill="currentColor" />
+                          </svg>
+                        </button>
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                          <rect x="1" y="11" width="3" height="4" rx="0.5" fill={online ? '#3B82F6' : '#D1D5DB'} />
+                          <rect x="5.5" y="7.5" width="3" height="7.5" rx="0.5" fill={online ? '#3B82F6' : '#D1D5DB'} />
+                          <rect x="10" y="4" width="3" height="11" rx="0.5" fill={online ? '#3B82F6' : '#D1D5DB'} />
+                        </svg>
+                      </div>
                     </div>
 
-                    {/* 中间名称和状态 */}
-                    <div className="flex-1 min-w-0">
-                      <h4 className="text-base font-semibold text-slate-900 mb-2 flex items-center gap-1">
-                        <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                        {device.locationName}
-                      </h4>
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs ${
-                          device.status === 'online'
-                            ? 'bg-green-50 text-green-700'
-                            : 'bg-slate-100 text-slate-600'
-                        }`}>
-                          <div className={`w-1.5 h-1.5 rounded-full ${
-                            device.status === 'online' ? 'bg-green-500' : 'bg-slate-400'
-                          }`}></div>
-                          {device.status === 'online' ? '在线' : '离线'}
+                    {/* ── 2. 工况状态（预留两行） ── */}
+                    <div className="px-4 pt-2.5 pb-0" style={{ minHeight: '56px' }}>
+                      {online ? (
+                        <>
+                          <div className="flex items-center flex-wrap gap-1.5 mb-1.5">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[13px] font-medium bg-green-50 text-green-700 border border-green-100">
+                              <span className="w-1.5 h-1.5 rounded-full bg-green-500 flex-shrink-0" />在线
+                            </span>
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[13px] font-medium bg-slate-100 text-slate-600 border border-slate-200">
+                              {device.productType}
+                            </span>
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[13px] font-medium bg-sky-50 text-sky-600 border border-sky-100">
+                              {device.positionType}
+                            </span>
+                          </div>
+                          <div className="h-[22px] flex items-center">
+                            {device.hasAlert && (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[13px] font-semibold bg-red-50 text-red-600 border border-red-100">
+                                <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse flex-shrink-0" />存在告警，请及时处理
+                              </span>
+                            )}
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="flex items-center gap-1 mb-1.5">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[13px] font-medium bg-slate-100 text-slate-400 border border-slate-200">
+                              <span className="w-1.5 h-1.5 rounded-full bg-slate-300 flex-shrink-0" />离线
+                            </span>
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[13px] font-medium bg-slate-50 text-slate-400 border border-slate-100">
+                              {device.productType}
+                            </span>
+                          </div>
+                          <div className="h-[22px]" />
+                        </>
+                      )}
+                    </div>
+
+                    {/* ── 3. 序列号（弱化） ── */}
+                    <div className="px-4 pt-1.5 pb-0">
+                      <p className="text-[11px] text-slate-300 leading-none truncate">
+                        S/N: {device.sn}&nbsp;&nbsp;|&nbsp;&nbsp;IMEI: {device.imei}
+                      </p>
+                    </div>
+
+                    {/* ── 4. 设备信息区（紧凑标签） ── */}
+                    <div className="px-4 pt-2.5 pb-3 flex-1">
+                      <div className="flex flex-wrap gap-1.5 items-start content-start overflow-hidden"
+                        style={{ minHeight: '62px', maxHeight: '62px' }}>
+                        <span className="inline-flex items-center px-2 py-1 rounded-md text-[13px] font-medium
+                          bg-blue-50 text-[#2563EB] border border-blue-100 whitespace-nowrap leading-none">
+                          <span className="text-slate-500 mr-0.5">项目:</span>
+                          <span className="font-semibold ml-0.5">{device.project}</span>
                         </span>
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-slate-100 text-slate-600">
-                          {device.positionType}
+                        <span className="inline-flex items-center px-2 py-1 rounded-md text-[13px] font-medium
+                          bg-blue-50 text-[#2563EB] border border-blue-100 whitespace-nowrap leading-none">
+                          <span className="text-slate-500 mr-0.5">经度:</span>
+                          <span className="font-semibold ml-0.5">{device.longitude}</span>
+                        </span>
+                        <span className="inline-flex items-center px-2 py-1 rounded-md text-[13px] font-medium
+                          bg-blue-50 text-[#2563EB] border border-blue-100 whitespace-nowrap leading-none">
+                          <span className="text-slate-500 mr-0.5">纬度:</span>
+                          <span className="font-semibold ml-0.5">{device.latitude}</span>
                         </span>
                         {device.hasAlert && (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs bg-red-50 text-red-700">
-                            <div className="w-1.5 h-1.5 rounded-full bg-red-500"></div>
-                            告警中
+                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[13px] font-bold
+                            bg-red-50 text-red-600 border border-red-100 whitespace-nowrap leading-none">
+                            <AlertTriangle className="w-3 h-3 flex-shrink-0" />
+                            设备告警
                           </span>
                         )}
                       </div>
                     </div>
 
-                    {/* 右上角图标 */}
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      <div className="relative">
-                        <button
-                          onMouseEnter={() => setShowQrTooltip(device.id)}
-                          onMouseLeave={() => setShowQrTooltip(null)}
-                          className="text-slate-600 hover:text-slate-900"
-                        >
-                          <QrCode className="w-5 h-5" />
-                        </button>
-                        {showQrTooltip === device.id && (
-                          <div className="absolute right-0 top-full mt-2 bg-white border border-slate-200 rounded-lg shadow-xl p-3 z-10 w-32">
-                            <div className="w-24 h-24 bg-slate-900 mb-2"></div>
-                            <p className="text-xs text-slate-600 text-center">扫码核对IMEI</p>
-                          </div>
-                        )}
+                    {/* ── 5. 底部操作栏 ── */}
+                    <div className="border-t border-slate-100 px-4 py-2.5 flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <button className="text-[13px] font-medium text-slate-500 hover:text-slate-700 transition-colors">配置</button>
+                        <span className="text-slate-200 text-xs">|</span>
+                        <button className="text-[13px] font-medium text-slate-500 hover:text-slate-700 transition-colors">详情</button>
+                        <span className="text-slate-200 text-xs">|</span>
+                        <div className="relative">
+                          <button
+                            onClick={() => setShowMoreMenu(showMoreMenu === device.id ? null : device.id)}
+                            className="text-[13px] font-medium text-slate-500 hover:text-slate-700 transition-colors flex items-center gap-0.5"
+                          >
+                            更多<ChevronDown className="w-3 h-3" />
+                          </button>
+                          {showMoreMenu === device.id && (
+                            <div className="absolute left-0 bottom-full mb-1 w-28 bg-white border border-slate-200 rounded shadow-lg z-10">
+                              <button className="w-full px-4 py-2 text-left text-xs text-slate-700 hover:bg-slate-50">修改</button>
+                              <button className="w-full px-4 py-2 text-left text-xs text-red-600 hover:bg-slate-50">删除</button>
+                            </div>
+                          )}
+                        </div>
                       </div>
-                      <Signal className="w-5 h-5 text-[#3B82F6]" />
-                    </div>
-                  </div>
-
-                  {/* 第二层：设备参数详情 */}
-                  <div className="px-4 pb-3 space-y-1.5">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-slate-500">S/N：</span>
-                      <span className="text-slate-900 font-medium">{device.sn}</span>
-                    </div>
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-slate-500">TNS/IMEI：</span>
-                      <span className="text-slate-900 font-medium">{device.imei}</span>
-                    </div>
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-slate-500">经纬度：</span>
-                      <span className="text-slate-900 font-medium">{device.longitude}, {device.latitude}</span>
-                    </div>
-                  </div>
-
-                  {/* 第三层：操作栏 */}
-                  <div className="border-t border-slate-100">
-                    <div className="flex items-center divide-x divide-slate-200">
-                      <button className="flex-1 py-2.5 text-xs text-[#3B82F6] hover:bg-slate-50 transition-colors font-medium">
+                      <button className={`flex items-center gap-1 text-[13px] font-medium transition-colors
+                        ${offline ? 'text-slate-300 cursor-default' : 'text-[#3B82F6] hover:text-blue-700'}`}>
+                        <ExternalLink className="w-3.5 h-3.5" />
                         查看数据
                       </button>
-                      <button className="flex-1 py-2.5 text-xs text-slate-600 hover:bg-slate-50 transition-colors font-medium">
-                        配置
-                      </button>
-                      <button className="flex-1 py-2.5 text-xs text-slate-600 hover:bg-slate-50 transition-colors font-medium">
-                        详情
-                      </button>
-                      <div className="flex-1 relative">
-                        <button
-                          onClick={() => setShowMoreMenu(showMoreMenu === device.id ? null : device.id)}
-                          className="w-full py-2.5 text-xs text-slate-600 hover:bg-slate-50 transition-colors font-medium flex items-center justify-center gap-1"
-                        >
-                          更多
-                          <ChevronDown className="w-3 h-3" />
-                        </button>
-                        {showMoreMenu === device.id && (
-                          <div className="absolute right-0 bottom-full mb-1 w-32 bg-white border border-slate-200 rounded shadow-lg z-10">
-                            <button className="w-full px-4 py-2 text-left text-xs text-slate-700 hover:bg-slate-50 transition-colors">
-                              修改
-                            </button>
-                            <button className="w-full px-4 py-2 text-left text-xs text-red-600 hover:bg-slate-50 transition-colors">
-                              删除
-                            </button>
-                          </div>
-                        )}
-                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
 
         {/* 列表视图 */}
         {viewMode === 'list' && (
-          <div className="overflow-x-auto">
+          <div className="flex-1 overflow-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-slate-200 bg-white h-12">
+                <tr className="border-b border-slate-200 bg-white h-12 sticky top-0 z-10">
                   <th className="px-6 text-left">
                     <input
                       type="checkbox"
@@ -465,7 +536,7 @@ export function DeviceManagement() {
                       onClick={() => handleSort('productType')}
                       className="flex items-center gap-1 hover:text-slate-900"
                     >
-                      产品类型
+                      设备类型
                       <div className="flex flex-col">
                         <ChevronUp className={`w-3 h-3 -mb-1 ${sortField === 'productType' && sortOrder === 'asc' ? 'text-[#3B82F6]' : 'text-slate-300'}`} />
                         <ChevronDown className={`w-3 h-3 ${sortField === 'productType' && sortOrder === 'desc' ? 'text-[#3B82F6]' : 'text-slate-300'}`} />
@@ -484,6 +555,8 @@ export function DeviceManagement() {
                       </div>
                     </button>
                   </th>
+                  <th className="px-6 text-left text-sm font-semibold text-slate-700">接入协议</th>
+                  <th className="px-6 text-left text-sm font-semibold text-slate-700">推送协议</th>
                   <th className="px-6 text-left text-sm font-semibold text-slate-700">
                     <button
                       onClick={() => handleSort('status')}
@@ -546,6 +619,12 @@ export function DeviceManagement() {
                       <span className="text-sm text-slate-900">{device.project}</span>
                     </td>
                     <td className="px-6">
+                      <ProtocolTag value={device.accessProtocol} />
+                    </td>
+                    <td className="px-6">
+                      <ProtocolTag value={device.pushProtocol} />
+                    </td>
+                    <td className="px-6">
                       <div className="flex items-center gap-2">
                         <div
                           className={`w-2 h-2 rounded-full ${
@@ -564,6 +643,12 @@ export function DeviceManagement() {
                     <td className="px-6">
                       <div className="flex items-center gap-3">
                         <button className="text-sm text-[#3B82F6] hover:text-blue-600 font-medium">
+                          查看数据
+                        </button>
+                        <button className="text-sm text-slate-600 hover:text-slate-900 font-medium">
+                          配置
+                        </button>
+                        <button className="text-sm text-slate-600 hover:text-slate-900 font-medium">
                           详情
                         </button>
                         <div className="relative">
@@ -595,7 +680,7 @@ export function DeviceManagement() {
         )}
 
         {/* 分页器 */}
-        <div className="px-6 py-4 border-t border-slate-200 flex items-center justify-between">
+        <div className="flex-shrink-0 px-6 py-3 border-t border-slate-200 flex items-center justify-between">
           <div className="text-sm text-slate-600">
             共 {totalItems} 条
           </div>

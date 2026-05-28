@@ -8,13 +8,16 @@ import { MapCard } from './components/MapCard';
 import { ProjectManagement } from './components/ProjectManagement';
 import { DeviceManagement } from './components/DeviceManagement';
 import { DataAnalysisPage } from './components/DataAnalysisPage';
+import { AlarmCenter } from './components/AlarmCenter';
+
+type Page = 'home' | 'projects' | 'devices' | 'analysis' | 'alarm-center';
 
 export default function App() {
-  const [currentPage, setCurrentPage] = useState<'home' | 'projects' | 'devices' | 'analysis'>('home');
+  const [currentPage, setCurrentPage] = useState<Page>('home');
 
   return (
     <div className="size-full flex bg-[#F3F4F6]">
-      <Sidebar currentPage={currentPage} onNavigate={setCurrentPage} />
+      <Sidebar currentPage={currentPage} onNavigate={(p) => setCurrentPage(p as Page)} />
 
       <div className="flex-1 flex flex-col min-w-0">
         <Header />
@@ -67,6 +70,7 @@ export default function App() {
         {currentPage === 'devices' && <DeviceManagement />}
 
         {currentPage === 'analysis' && <DataAnalysisPage />}
+        {currentPage === 'alarm-center' && <AlarmCenter />}
       </div>
     </div>
   );

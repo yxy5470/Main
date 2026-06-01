@@ -1,13 +1,42 @@
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Home, ChevronRight } from 'lucide-react';
 import { useState } from 'react';
 
-export function Header() {
+interface BreadcrumbItem {
+  label: string;
+  onClick?: () => void;
+}
+
+interface HeaderProps {
+  breadcrumbs?: BreadcrumbItem[];
+}
+
+export function Header({ breadcrumbs = [{ label: '首页' }] }: HeaderProps) {
   const [showDropdown, setShowDropdown] = useState(true);
 
   return (
     <header className="h-16 bg-white border-b border-slate-200 px-8 flex items-center justify-between flex-shrink-0">
-      <div className="flex items-center gap-2">
-        <span className="text-muted-foreground">首页</span>
+      <div className="flex items-center gap-2 text-sm">
+        <Home className="w-4 h-4 text-[#8C8C8C]" />
+        {breadcrumbs.map((item, index) => {
+          const isLast = index === breadcrumbs.length - 1;
+          return (
+            <div key={index} className="flex items-center gap-2">
+              <ChevronRight className="w-3.5 h-3.5 text-[#BFBFBF]" />
+              {item.onClick && !isLast ? (
+                <button
+                  onClick={item.onClick}
+                  className="text-[#595959] hover:text-[#1890FF] transition-colors"
+                >
+                  {item.label}
+                </button>
+              ) : (
+                <span className={isLast ? 'text-[#262626] font-medium' : 'text-[#595959]'}>
+                  {item.label}
+                </span>
+              )}
+            </div>
+          );
+        })}
       </div>
 
       <div className="relative">

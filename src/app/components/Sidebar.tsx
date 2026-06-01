@@ -5,26 +5,30 @@ import {
   Cpu, Database, Megaphone, FileText, ClipboardList, MessageSquare,
 } from 'lucide-react';
 
-type Page = 'home' | 'projects' | 'devices' | 'analysis' | 'alarm-center';
+type Page = 'home' | 'projects' | 'devices' | 'analysis' | 'alarm-center' | 'user-management' | 'role-management' | 'device-type' | 'data-type' | 'notice' | 'login-log' | 'op-log' | 'feedback';
 
 interface SidebarProps {
   currentPage: Page;
   onNavigate: (page: Page) => void;
 }
 
-const SYSTEM_SUB: { icon: ReactNode; label: string }[] = [
-  { icon: <Users className="w-4 h-4 flex-shrink-0" />,         label: '用户管理' },
-  { icon: <Shield className="w-4 h-4 flex-shrink-0" />,        label: '角色管理' },
-  { icon: <Cpu className="w-4 h-4 flex-shrink-0" />,           label: '设备类型' },
-  { icon: <Database className="w-4 h-4 flex-shrink-0" />,      label: '数据类型' },
-  { icon: <Megaphone className="w-4 h-4 flex-shrink-0" />,     label: '通知公告' },
-  { icon: <FileText className="w-4 h-4 flex-shrink-0" />,      label: '登录日志' },
-  { icon: <ClipboardList className="w-4 h-4 flex-shrink-0" />, label: '操作日志' },
+const SYSTEM_SUB: { icon: ReactNode; label: string; page?: Page }[] = [
+  { icon: <Users className="w-4 h-4 flex-shrink-0" />,         label: '用户管理', page: 'user-management' },
+  { icon: <Shield className="w-4 h-4 flex-shrink-0" />,        label: '角色管理', page: 'role-management' },
+  { icon: <Cpu className="w-4 h-4 flex-shrink-0" />,           label: '设备类型', page: 'device-type' },
+  { icon: <Database className="w-4 h-4 flex-shrink-0" />,      label: '数据类型', page: 'data-type' },
+  { icon: <Megaphone className="w-4 h-4 flex-shrink-0" />,     label: '通知公告', page: 'notice' },
+  { icon: <FileText className="w-4 h-4 flex-shrink-0" />,      label: '登录日志', page: 'login-log' },
+  { icon: <ClipboardList className="w-4 h-4 flex-shrink-0" />, label: '操作日志', page: 'op-log' },
 ];
 
 export function Sidebar({ currentPage, onNavigate }: SidebarProps) {
   const [alarmExpanded, setAlarmExpanded]   = useState(currentPage === 'alarm-center');
-  const [systemExpanded, setSystemExpanded] = useState(false);
+  const [systemExpanded, setSystemExpanded] = useState(
+    currentPage === 'user-management' || currentPage === 'role-management' ||
+    currentPage === 'device-type' || currentPage === 'data-type' || currentPage === 'notice' ||
+    currentPage === 'login-log' || currentPage === 'op-log'
+  );
 
   const isAlarmActive = currentPage === 'alarm-center';
 
@@ -92,8 +96,10 @@ export function Sidebar({ currentPage, onNavigate }: SidebarProps) {
             parentActive={false}
             onToggle={() => setSystemExpanded(v => !v)}
           >
-            {SYSTEM_SUB.map(({ icon, label }) => (
-              <SubItem key={label} icon={icon} label={label} active={false} onClick={() => {}} />
+            {SYSTEM_SUB.map(({ icon, label, page }) => (
+              <SubItem key={label} icon={icon} label={label}
+                active={!!page && currentPage === page}
+                onClick={() => page && onNavigate(page)} />
             ))}
           </ExpandableNav>
 
@@ -101,8 +107,8 @@ export function Sidebar({ currentPage, onNavigate }: SidebarProps) {
           <NavItem
             icon={<MessageSquare className="w-5 h-5" />}
             label="问题反馈"
-            active={false}
-            onClick={() => {}}
+            active={currentPage === 'feedback'}
+            onClick={() => onNavigate('feedback')}
           />
         </div>
       </nav>

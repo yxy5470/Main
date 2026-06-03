@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
+import { TabBar, Tab } from './components/TabBar';
 import { StatCard } from './components/StatCard';
 import { ProjectTable } from './components/ProjectTable';
 import { AlertList } from './components/AlertList';
@@ -17,34 +18,82 @@ import { NoticeManagement } from './components/NoticeManagement';
 import { LoginLog } from './components/LoginLog';
 import { OperationLog } from './components/OperationLog';
 import { FeedbackManagement } from './components/FeedbackManagement';
+import { AlarmRules } from './components/AlarmRules';
+import { AlarmNotification } from './components/AlarmNotification';
 
-type Page = 'home' | 'projects' | 'devices' | 'analysis' | 'alarm-center' | 'user-management' | 'role-management' | 'device-type' | 'data-type' | 'notice' | 'login-log' | 'op-log' | 'feedback';
+type Page = 'home' | 'projects' | 'devices' | 'analysis' | 'alarm-center' | 'alarm-rules' | 'alarm-notification' | 'user-management' | 'role-management' | 'device-type' | 'data-type' | 'notice' | 'login-log' | 'op-log' | 'feedback';
 
-const PAGE_BREADCRUMBS: Record<Page, { label: string }[]> = {
-  'home': [{ label: '首页' }],
-  'projects': [{ label: '首页' }, { label: '项目管理' }],
-  'devices': [{ label: '首页' }, { label: '设备管理' }],
-  'analysis': [{ label: '首页' }, { label: '监测数据与分析' }],
-  'alarm-center': [{ label: '首页' }, { label: '告警中心' }],
-  'user-management': [{ label: '首页' }, { label: '系统管理' }, { label: '用户管理' }],
-  'role-management': [{ label: '首页' }, { label: '系统管理' }, { label: '角色管理' }],
-  'device-type': [{ label: '首页' }, { label: '系统管理' }, { label: '设备类型管理' }],
-  'data-type': [{ label: '首页' }, { label: '系统管理' }, { label: '数据类型管理' }],
-  'notice': [{ label: '首页' }, { label: '系统管理' }, { label: '通知公告' }],
-  'login-log': [{ label: '首页' }, { label: '系统管理' }, { label: '登录日志' }],
-  'op-log': [{ label: '首页' }, { label: '系统管理' }, { label: '操作日志' }],
-  'feedback': [{ label: '首页' }, { label: '系统管理' }, { label: '问题反馈' }],
+const PAGE_CONFIG: Record<Page, { label: string; breadcrumbs: { label: string }[] }> = {
+  'home': { label: '首页', breadcrumbs: [{ label: '首页' }] },
+  'projects': { label: '项目管理', breadcrumbs: [{ label: '首页' }, { label: '项目管理' }] },
+  'devices': { label: '设备管理', breadcrumbs: [{ label: '首页' }, { label: '设备管理' }] },
+  'analysis': { label: '监测数据与分析', breadcrumbs: [{ label: '首页' }, { label: '监测数据与分析' }] },
+  'alarm-center': { label: '告警处理台', breadcrumbs: [{ label: '首页' }, { label: '告警中心' }, { label: '告警处理台' }] },
+  'alarm-rules': { label: '告警规则', breadcrumbs: [{ label: '首页' }, { label: '告警中心' }, { label: '告警规则' }] },
+  'alarm-notification': { label: '告警通知管理', breadcrumbs: [{ label: '首页' }, { label: '告警中心' }, { label: '告警通知管理' }] },
+  'user-management': { label: '用户管理', breadcrumbs: [{ label: '首页' }, { label: '系统管理' }, { label: '用户管理' }] },
+  'role-management': { label: '角色管理', breadcrumbs: [{ label: '首页' }, { label: '系统管理' }, { label: '角色管理' }] },
+  'device-type': { label: '设备类型管理', breadcrumbs: [{ label: '首页' }, { label: '系统管理' }, { label: '设备类型管理' }] },
+  'data-type': { label: '数据类型管理', breadcrumbs: [{ label: '首页' }, { label: '系统管理' }, { label: '数据类型管理' }] },
+  'notice': { label: '通知公告', breadcrumbs: [{ label: '首页' }, { label: '系统管理' }, { label: '通知公告' }] },
+  'login-log': { label: '登录日志', breadcrumbs: [{ label: '首页' }, { label: '系统管理' }, { label: '登录日志' }] },
+  'op-log': { label: '操作日志', breadcrumbs: [{ label: '首页' }, { label: '系统管理' }, { label: '操作日志' }] },
+  'feedback': { label: '问题反馈', breadcrumbs: [{ label: '首页' }, { label: '系统管理' }, { label: '问题反馈' }] },
 };
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<Page>('home');
+  const [tabs, setTabs] = useState<Tab[]>([
+    { key: 'home', label: '首页', closable: false }
+  ]);
+
+  const handleNavigate = (page: string) => {
+    const pageKey = page as Page;
+    const pageConfig = PAGE_CONFIG[pageKey];
+
+    // 检查标签是否已存在
+    setTabs(prevTabs => {
+      const tabExists = prevTabs.some(tab => tab.key === pageKey);
+      if (!tabExists) {
+        return [...prevTabs, {
+          key: pageKey,
+          label: pageConfig.label,
+          closable: true
+        }];
+      }
+      return prevTabs;
+    });
+
+    setCurrentPage(pageKey);
+  };
+
+  const handleTabClick = (key: string) => {
+    setCurrentPage(key as Page);
+  };
+
+  const handleTabClose = (key: string) => {
+    const newTabs = tabs.filter(tab => tab.key !== key);
+    setTabs(newTabs);
+
+    // 如果关闭的是当前激活的标签，切换到最后一个标签
+    if (key === currentPage) {
+      const lastTab = newTabs[newTabs.length - 1];
+      setCurrentPage(lastTab.key as Page);
+    }
+  };
 
   return (
     <div className="size-full flex bg-[#F3F4F6]">
-      <Sidebar currentPage={currentPage} onNavigate={(p) => setCurrentPage(p as Page)} />
+      <Sidebar currentPage={currentPage} onNavigate={handleNavigate} />
 
       <div className="flex-1 flex flex-col min-w-0">
-        <Header breadcrumbs={PAGE_BREADCRUMBS[currentPage]} />
+        <Header breadcrumbs={PAGE_CONFIG[currentPage].breadcrumbs} />
+        <TabBar
+          tabs={tabs}
+          activeKey={currentPage}
+          onTabClick={handleTabClick}
+          onTabClose={handleTabClose}
+        />
 
         {currentPage === 'home' && (
           <main className="flex-1 overflow-auto px-8 py-6">
@@ -95,6 +144,8 @@ export default function App() {
 
         {currentPage === 'analysis' && <DataAnalysisPage />}
         {currentPage === 'alarm-center' && <AlarmCenter />}
+        {currentPage === 'alarm-rules' && <AlarmRules />}
+        {currentPage === 'alarm-notification' && <AlarmNotification />}
         {currentPage === 'user-management' && <UserManagement />}
         {currentPage === 'role-management' && <RoleManagement />}
         {currentPage === 'device-type' && <DeviceTypeManagement />}

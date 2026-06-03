@@ -2,10 +2,10 @@ import { useState, type ReactNode } from 'react';
 import {
   Home, Layers, Activity, Settings, Bell, FolderOpen,
   ChevronDown, ChevronRight, AlertCircle, Users, Shield,
-  Cpu, Database, Megaphone, FileText, ClipboardList, MessageSquare,
+  Cpu, Database, Megaphone, FileText, ClipboardList, MessageSquare, ListTree, BellRing,
 } from 'lucide-react';
 
-type Page = 'home' | 'projects' | 'devices' | 'analysis' | 'alarm-center' | 'user-management' | 'role-management' | 'device-type' | 'data-type' | 'notice' | 'login-log' | 'op-log' | 'feedback';
+type Page = 'home' | 'projects' | 'devices' | 'analysis' | 'alarm-center' | 'alarm-rules' | 'alarm-notification' | 'user-management' | 'role-management' | 'device-type' | 'data-type' | 'notice' | 'login-log' | 'op-log' | 'feedback';
 
 interface SidebarProps {
   currentPage: Page;
@@ -23,14 +23,16 @@ const SYSTEM_SUB: { icon: ReactNode; label: string; page?: Page }[] = [
 ];
 
 export function Sidebar({ currentPage, onNavigate }: SidebarProps) {
-  const [alarmExpanded, setAlarmExpanded]   = useState(currentPage === 'alarm-center');
+  const [alarmExpanded, setAlarmExpanded]   = useState(
+    currentPage === 'alarm-center' || currentPage === 'alarm-rules' || currentPage === 'alarm-notification'
+  );
   const [systemExpanded, setSystemExpanded] = useState(
     currentPage === 'user-management' || currentPage === 'role-management' ||
     currentPage === 'device-type' || currentPage === 'data-type' || currentPage === 'notice' ||
     currentPage === 'login-log' || currentPage === 'op-log'
   );
 
-  const isAlarmActive = currentPage === 'alarm-center';
+  const isAlarmActive = currentPage === 'alarm-center' || currentPage === 'alarm-rules' || currentPage === 'alarm-notification';
 
   return (
     <aside className="w-64 bg-[#1E293B] flex flex-col h-full flex-shrink-0">
@@ -69,6 +71,18 @@ export function Sidebar({ currentPage, onNavigate }: SidebarProps) {
               label="告警处理台"
               active={currentPage === 'alarm-center'}
               onClick={() => onNavigate('alarm-center')}
+            />
+            <SubItem
+              icon={<ListTree className="w-4 h-4 flex-shrink-0" />}
+              label="告警规则"
+              active={currentPage === 'alarm-rules'}
+              onClick={() => onNavigate('alarm-rules')}
+            />
+            <SubItem
+              icon={<BellRing className="w-4 h-4 flex-shrink-0" />}
+              label="告警通知管理"
+              active={currentPage === 'alarm-notification'}
+              onClick={() => onNavigate('alarm-notification')}
             />
           </ExpandableNav>
 

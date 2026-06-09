@@ -6,7 +6,7 @@ import {
 
 /* ─────────────────── types ─────────────────── */
 type TabType = 'strategy' | 'contacts' | 'templates';
-type TemplateType = 'sms' | 'email' | 'voice';
+type TemplateType = 'sms' | 'system';
 
 interface Strategy {
   id: string;
@@ -422,8 +422,7 @@ export function AlarmNotification() {
                   <div className="flex items-center gap-2">
                     {[
                       { key: 'sms' as TemplateType, label: '短信模板' },
-                      { key: 'email' as TemplateType, label: '邮件模板' },
-                      { key: 'voice' as TemplateType, label: '语音模板' },
+                      { key: 'system' as TemplateType, label: '系统通知模板' },
                     ].map(type => (
                       <button
                         key={type.key}

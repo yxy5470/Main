@@ -108,8 +108,6 @@ const DATA_TYPES: DataTypeRow[] = [
   },
 ];
 
-const STRUCTURE_OPTIONS = ['数据结构（全部）', '基础型', '复合型'];
-
 /* ─────────────────── small components ─────────────────── */
 
 function Select({ value, options, onChange }: { value: string; options: string[]; onChange: (v: string) => void }) {
@@ -273,26 +271,12 @@ function RootRow({ row, expanded, onToggle }: { row: DataTypeRow; expanded: bool
       <td className="px-3 py-3">
         <RootCodeBadge code={row.code} />
       </td>
-      {/* value type */}
-      <td className="px-3 py-3">
-        <ValueTypeTag label={row.valueType} kind={valueTypeKind(row.valueType)} />
-      </td>
-      {/* parse rule */}
-      <td className="px-3 py-3">
-        <span className="text-xs text-[#8C8C8C]">{row.parseRule}</span>
-      </td>
-      {/* match mode */}
-      <td className="px-3 py-3">
-        <RootMatchTag label={row.matchMode} />
-      </td>
       {/* unit */}
       <td className="px-3 py-3 text-sm text-[#8C8C8C]">{row.unit}</td>
       {/* ops */}
       <td className="px-3 py-3">
         <div className="flex items-center gap-0.5 whitespace-nowrap">
           <button className="text-xs text-[#1890FF] hover:text-[#40A9FF] px-1 transition-colors">编辑</button>
-          <span className="text-[#D9D9D9] text-xs">|</span>
-          <button className="text-xs text-[#1890FF] hover:text-[#40A9FF] px-1 transition-colors">增加字段</button>
           <span className="text-[#D9D9D9] text-xs">|</span>
           <button className="text-xs text-[#FF4D4F] hover:text-[#FF7875] px-1 transition-colors">删除</button>
         </div>
@@ -320,18 +304,6 @@ function ChildRow({ field, isLast }: { field: ChildField; isLast: boolean }) {
       <td className="px-3 py-2.5">
         <ChildIndexBadge index={field.index} />
       </td>
-      {/* value type */}
-      <td className="px-3 py-2.5">
-        <ValueTypeTag label={field.valueType} kind={valueTypeKind(field.valueType)} />
-      </td>
-      {/* parse rule */}
-      <td className="px-3 py-2.5">
-        <span className="text-xs text-[#8C8C8C]">{field.parseRule}</span>
-      </td>
-      {/* match mode */}
-      <td className="px-3 py-2.5">
-        <ChildMatchTag mode={field.matchMode} />
-      </td>
       {/* unit */}
       <td className="px-3 py-2.5 text-sm text-[#595959]">{field.unit}</td>
       {/* ops */}
@@ -350,7 +322,6 @@ function ChildRow({ field, isLast }: { field: ChildField; isLast: boolean }) {
 /* ─────────────────── main page ─────────────────── */
 export function DataTypeManagement() {
   const [keyword, setKeyword]     = useState('');
-  const [structure, setStructure] = useState('数据结构（全部）');
   const [currentPage, setPage]    = useState(1);
   const [expanded, setExpanded]   = useState<Set<string>>(new Set(['1']));
 
@@ -359,11 +330,7 @@ export function DataTypeManagement() {
 
   const filtered = DATA_TYPES.filter(row => {
     const matchKw = !keyword || row.name.includes(keyword) || row.code.includes(keyword);
-    const matchStr =
-      structure === '数据结构（全部）' ||
-      (structure === '复合型' && row.structure === 'composite') ||
-      (structure === '基础型' && row.structure === 'basic');
-    return matchKw && matchStr;
+    return matchKw;
   });
 
   const toggleExpand = (id: string) => {
@@ -396,9 +363,6 @@ export function DataTypeManagement() {
               />
             </div>
 
-            {/* 数据结构下拉 */}
-            <Select value={structure} options={STRUCTURE_OPTIONS} onChange={v => { setStructure(v); setPage(1); }} />
-
             {/* 查询按钮 */}
             <button className="h-8 px-4 bg-[#1890FF] hover:bg-[#40A9FF] text-white text-sm rounded transition-colors">
               🔍 查询
@@ -423,7 +387,7 @@ export function DataTypeManagement() {
             <thead>
               <tr style={{ background: '#FAFAFA', borderBottom: '1px solid #E8E8E8' }}>
                 <th className="w-10 px-3 py-3" />
-                {['数据类型', '数据标识码 / 索引', '值类型', '解析规则', '匹配模式', '单位', '操作'].map(col => (
+                {['数据类型', '数据标识码 / 索引', '单位', '操作'].map(col => (
                   <th key={col} className="px-3 py-3 text-left text-sm font-semibold text-[#262626] whitespace-nowrap">
                     {col}
                   </th>

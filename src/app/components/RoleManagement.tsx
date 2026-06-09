@@ -178,7 +178,6 @@ function GroupLabel({ label }: { label: string }) {
 /* ─────────────────── main page ─────────────────── */
 export function RoleManagement() {
   const [selectedRole, setSelectedRole] = useState<Role>(ROLES[3]); // "项目只读访客"
-  const [activeTab, setActiveTab]       = useState<'menu' | 'data'>('menu');
   const [checked, setChecked]           = useState<Set<string>>(new Set(READONLY_CHECKED));
   const [searchRole, setSearchRole]     = useState('');
 
@@ -308,42 +307,19 @@ export function RoleManagement() {
           <div className="border-t border-slate-100" />
         </div>
 
-        {/* Tab 页签 */}
-        <div className="px-6 flex-shrink-0 border-b border-slate-100">
-          <div className="flex items-center gap-6">
-            {(['menu', 'data'] as const).map(tab => {
-              const label = tab === 'menu' ? '菜单与功能权限' : '数据范围权限';
-              const active = activeTab === tab;
-              return (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`py-3 text-sm font-medium transition-colors relative ${active ? 'text-blue-600' : 'text-slate-500 hover:text-slate-700'}`}
-                >
-                  {label}
-                  {active && (
-                    <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500 rounded-t-full" />
-                  )}
-                </button>
-              );
-            })}
-          </div>
+        {/* 权限配置标题 */}
+        <div className="px-6 py-3 flex-shrink-0 border-b border-slate-100">
+          <h3 className="text-sm font-semibold text-slate-700">菜单与功能权限</h3>
         </div>
 
-        {/* 权限树 / 数据范围 */}
+        {/* 权限树 */}
         <div className="flex-1 overflow-auto px-6 py-4">
-          {activeTab === 'menu' ? (
-            <div>
-              {PERM_TREE.map(node => (
-                <PermTreeNode key={node.id} node={node} depth={0}
-                  checked={checked} onToggle={toggleNode} />
-              ))}
-            </div>
-          ) : (
-            <div className="flex items-center justify-center h-32 text-sm text-slate-300">
-              数据范围权限配置（敬请期待）
-            </div>
-          )}
+          <div>
+            {PERM_TREE.map(node => (
+              <PermTreeNode key={node.id} node={node} depth={0}
+                checked={checked} onToggle={toggleNode} />
+            ))}
+          </div>
         </div>
 
         {/* 底部操作栏 */}

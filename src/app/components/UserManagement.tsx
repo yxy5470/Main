@@ -341,15 +341,10 @@ export function UserManagement() {
 
                     {/* 操作 */}
                     <td className="px-4">
-                      <div className="flex items-center gap-0.5 text-sm text-blue-500">
-                        <button className="hover:text-blue-700 transition-colors px-1">编辑</button>
+                      <div className="flex items-center gap-0.5 text-sm">
+                        <button className="text-[#1890FF] hover:text-[#40A9FF] transition-colors px-1">编辑</button>
                         <span className="text-slate-200 select-none">|</span>
-                        <button className="hover:text-blue-700 transition-colors px-1">分配角色</button>
-                        <span className="text-slate-200 select-none">|</span>
-                        <MoreMenu
-                          open={openMore === user.id}
-                          onToggle={() => setOpenMore(openMore === user.id ? null : user.id)}
-                        />
+                        <button className="text-[#FF4D4F] hover:text-[#FF7875] transition-colors px-1">删除</button>
                       </div>
                     </td>
                   </tr>

@@ -203,7 +203,7 @@ export function NoticeManagement() {
           <table className="w-full border-collapse">
             <thead>
               <tr style={{ background: '#FAFAFA', borderBottom: '1px solid #E8E8E8' }}>
-                {['序号', '公告标题', '公告类型', '发布状态', '目标对象', '创建人', '发布时间', '操作'].map(col => (
+                {['序号', '公告标题', '公告类型', '发布状态', '创建人', '发布时间', '操作'].map(col => (
                   <th key={col} className="px-4 py-3 text-left text-sm font-semibold text-[#262626] whitespace-nowrap">
                     {col}
                   </th>
@@ -251,9 +251,6 @@ export function NoticeManagement() {
                         </span>
                       </div>
                     </td>
-
-                    {/* 目标对象 */}
-                    <td className="px-4 py-3 text-sm text-[#595959]">{notice.target}</td>
 
                     {/* 创建人 */}
                     <td className="px-4 py-3 text-sm text-[#595959]">{notice.creator}</td>

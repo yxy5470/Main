@@ -449,7 +449,7 @@ export function AlarmNotification() {
                 <table className="w-full border-collapse">
                   <thead>
                     <tr style={{ background: '#FAFAFA', borderBottom: '1px solid #E4E7ED' }}>
-                      {['模板标题', '通道类型', '内容预览', '操作'].map(col => (
+                      {['模板标题', '内容预览', '操作'].map(col => (
                         <th key={col} className="px-6 py-3 text-left text-sm font-semibold text-[#262626]">
                           {col}
                         </th>
@@ -462,12 +462,6 @@ export function AlarmNotification() {
                         style={{ borderBottom: '1px solid #F0F0F0' }}>
                         <td className="px-6 py-4">
                           <span className="text-sm font-medium text-[#262626]">{template.title}</span>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium"
-                            style={{ color: '#531DAB', background: '#F9F0FF', border: '1px solid #D3ADF7' }}>
-                            {template.channel}
-                          </span>
                         </td>
                         <td className="px-6 py-4">
                           <VariableText text={template.content} />

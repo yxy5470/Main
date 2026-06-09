@@ -273,7 +273,7 @@ export function DeviceTypeManagement() {
           <table className="w-full border-collapse">
             <thead>
               <tr style={{ background: '#FAFAFA', borderBottom: '1px solid #E8E8E8' }}>
-                {['设备缩略图', '设备类型名称', '类型编码', '所属分类', '接入协议', '关联设备数', '状态', '操作'].map(col => (
+                {['设备缩略图', '设备类型名称', '类型编码', '所属分类', '接入物模型', '关联设备数', '状态', '操作'].map(col => (
                   <th key={col}
                     className="text-left px-4 py-3 text-sm font-semibold"
                     style={{ color: '#262626' }}>
@@ -353,11 +353,11 @@ export function DeviceTypeManagement() {
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-0.5">
                         <button className="text-sm text-[#1890FF] hover:text-[#40A9FF] transition-colors px-1">
-                          ⚙️ 物模型配置
+                          编辑
                         </button>
                         <span className="text-[#E8E8E8] text-sm">|</span>
-                        <button className="text-sm text-[#1890FF] hover:text-[#40A9FF] transition-colors px-1 flex items-center gap-0.5">
-                          更多 <span className="text-xs">▾</span>
+                        <button className="text-sm text-[#FF4D4F] hover:text-[#FF7875] transition-colors px-1">
+                          删除
                         </button>
                       </div>
                     </td>

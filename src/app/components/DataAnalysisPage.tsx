@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import {
-  Network, Grid3x3, List, Signal,
+  Network, Grid3x3, List,
   Search, X, ChevronDown, ChevronRight, FolderOpen, MapPin,
-  AlertTriangle, Star, ExternalLink,
+  AlertTriangle, Star, ExternalLink, Building2, Check,
 } from 'lucide-react';
 
 /* ─────────────────── types ─────────────────── */
@@ -200,6 +200,216 @@ const TREE: TreeNodeDef[] = [{
   ],
 }];
 
+/* ─────────────────── tree select dropdown ─────────────────── */
+type NodeType = 'org' | 'project' | 'device';
+
+function nodeIcon(type: NodeType, selected: boolean) {
+  const base = 'w-3.5 h-3.5 flex-shrink-0';
+  if (type === 'org')     return <Building2 className={`${base} ${selected ? 'text-white' : 'text-blue-400'}`} />;
+  if (type === 'project') return <FolderOpen className={`${base} ${selected ? 'text-white' : 'text-amber-500'}`} />;
+  return                         <MapPin    className={`${base} ${selected ? 'text-white' : 'text-slate-400'}`} />;
+}
+
+function flattenTree(nodes: TreeNodeDef[], query: string): TreeNodeDef[] {
+  const q = query.toLowerCase();
+  const results: TreeNodeDef[] = [];
+  function walk(n: TreeNodeDef) {
+    if (n.label.toLowerCase().includes(q)) results.push(n);
+    n.children?.forEach(walk);
+  }
+  nodes.forEach(walk);
+  return results;
+}
+
+function TreeDropdownNode({
+  node, depth, selectedId, expandedIds, onSelect, onToggle,
+}: {
+  node: TreeNodeDef; depth: number;
+  selectedId: string; expandedIds: Set<string>;
+  onSelect: (id: string, label: string) => void;
+  onToggle: (id: string) => void;
+}) {
+  const isSelected = selectedId === node.id;
+  const isExpanded = expandedIds.has(node.id);
+  const hasChildren = !!node.children?.length;
+
+  return (
+    <div>
+      <div
+        onClick={() => {
+          onSelect(node.id, node.label);
+          if (hasChildren) onToggle(node.id);
+        }}
+        style={{ paddingLeft: `${10 + depth * 16}px`, paddingRight: '8px' }}
+        className={`flex items-center gap-1.5 h-8 rounded-md cursor-pointer text-xs transition-colors select-none
+          ${isSelected
+            ? 'bg-[#3B82F6] text-white font-semibold'
+            : 'text-slate-600 hover:bg-blue-50 hover:text-slate-900'}`}
+      >
+        <span className="w-4 flex-shrink-0 flex items-center justify-center">
+          {hasChildren
+            ? isExpanded
+              ? <ChevronDown className="w-3.5 h-3.5 opacity-60" />
+              : <ChevronRight className="w-3.5 h-3.5 opacity-60" />
+            : null}
+        </span>
+        {nodeIcon(node.type, isSelected)}
+        <span className="flex-1 truncate leading-none">{node.label}</span>
+        {isSelected && <Check className="w-3 h-3 flex-shrink-0 opacity-80" />}
+      </div>
+      {hasChildren && isExpanded && node.children!.map(c => (
+        <TreeDropdownNode key={c.id} node={c} depth={depth + 1}
+          selectedId={selectedId} expandedIds={expandedIds}
+          onSelect={onSelect} onToggle={onToggle} />
+      ))}
+    </div>
+  );
+}
+
+function TreeSelectDropdown({
+  tree, value, label, onChange,
+}: {
+  tree: TreeNodeDef[];
+  value: string;
+  label: string;
+  onChange: (id: string, label: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState('');
+  const [expanded, setExpanded] = useState<Set<string>>(new Set(['org-1', 'proj-1', 'proj-2']));
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false);
+        setSearch('');
+      }
+    }
+    if (open) document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [open]);
+
+  const toggle = (id: string) => {
+    const next = new Set(expanded);
+    next.has(id) ? next.delete(id) : next.add(id);
+    setExpanded(next);
+  };
+
+  const handleSelect = (id: string, lbl: string) => {
+    onChange(id, lbl);
+    setOpen(false);
+    setSearch('');
+  };
+
+  const isSearching = search.trim().length > 0;
+  const flatResults = isSearching ? flattenTree(tree, search.trim()) : [];
+
+  return (
+    <div ref={containerRef} className="relative">
+      {/* Trigger */}
+      <button
+        onClick={() => setOpen(v => !v)}
+        className={`h-9 flex items-center gap-2 px-3 border rounded-md text-sm transition-all bg-white min-w-[175px]
+          ${open
+            ? 'border-blue-400 ring-2 ring-blue-100 text-slate-700'
+            : 'border-slate-300 text-slate-500 hover:border-blue-300 hover:bg-blue-50/20'}`}
+      >
+        <Network className={`w-3.5 h-3.5 flex-shrink-0 ${value ? 'text-blue-500' : 'text-slate-400'}`} />
+        <span className={`flex-1 text-left truncate ${value ? 'text-slate-700 font-medium' : 'text-slate-400'}`}>
+          {label || '选择项目节点'}
+        </span>
+        {value ? (
+          <button
+            onClick={e => { e.stopPropagation(); onChange('', ''); }}
+            className="text-slate-400 hover:text-slate-600 flex-shrink-0"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        ) : (
+          <ChevronDown className={`w-3.5 h-3.5 flex-shrink-0 text-slate-400 transition-transform ${open ? 'rotate-180' : ''}`} />
+        )}
+      </button>
+
+      {/* Dropdown panel */}
+      {open && (
+        <div className="absolute left-0 top-full mt-1.5 w-64 bg-white border border-slate-200 rounded-lg shadow-xl z-50
+          overflow-hidden"
+          style={{ boxShadow: '0 8px 24px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08)' }}
+        >
+          {/* Search bar */}
+          <div className="px-2.5 py-2 border-b border-slate-100">
+            <div className="relative">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+              <input
+                autoFocus
+                type="text"
+                placeholder="搜索节点..."
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                className="w-full h-8 pl-8 pr-8 text-xs border border-slate-200 rounded-md bg-slate-50
+                  focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 focus:bg-white transition-all"
+              />
+              {search && (
+                <button onClick={() => setSearch('')}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                  <X className="w-3 h-3" />
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Tree content */}
+          <div className="overflow-auto py-1.5 px-1.5" style={{ maxHeight: '260px' }}>
+            {isSearching ? (
+              flatResults.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-8 text-slate-400">
+                  <Search className="w-5 h-5 mb-1.5 opacity-40" />
+                  <span className="text-xs">未找到匹配节点</span>
+                </div>
+              ) : (
+                flatResults.map(n => (
+                  <div
+                    key={n.id}
+                    onClick={() => handleSelect(n.id, n.label)}
+                    className={`flex items-center gap-2 h-8 px-3 rounded-md cursor-pointer text-xs transition-colors select-none
+                      ${value === n.id
+                        ? 'bg-[#3B82F6] text-white font-semibold'
+                        : 'text-slate-600 hover:bg-blue-50 hover:text-slate-900'}`}
+                  >
+                    {nodeIcon(n.type, value === n.id)}
+                    <span className="flex-1 truncate">{n.label}</span>
+                    {value === n.id && <Check className="w-3 h-3 flex-shrink-0 opacity-80" />}
+                  </div>
+                ))
+              )
+            ) : (
+              tree.map(n => (
+                <TreeDropdownNode key={n.id} node={n} depth={0}
+                  selectedId={value} expandedIds={expanded}
+                  onSelect={handleSelect} onToggle={toggle} />
+              ))
+            )}
+          </div>
+
+          {/* Footer hint */}
+          <div className="border-t border-slate-100 px-3 py-1.5 flex items-center justify-between">
+            <span className="text-[11px] text-slate-400">点击节点进行筛选</span>
+            {value && (
+              <button
+                onClick={() => { onChange('', ''); setOpen(false); }}
+                className="text-[11px] text-blue-500 hover:text-blue-700 font-medium"
+              >
+                清除选择
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ─────────────────── search input ─────────────────── */
 function SearchInput({
   placeholder, value, onChange, width = 'w-36',
@@ -234,17 +444,20 @@ function TopBar({
   sn: string;   setSn:   (v: string) => void;
   imei: string; setImei: (v: string) => void;
 }) {
+  const [nodeId, setNodeId] = useState('');
+  const [nodeLabel, setNodeLabel] = useState('');
+
   return (
     <div
       className="bg-white border-b border-slate-200 flex items-center gap-2.5 px-5 py-2.5 flex-shrink-0"
       style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}
     >
-      <button className="h-9 flex items-center gap-2 px-3 border border-slate-300 rounded-md text-sm text-slate-500
-        hover:border-blue-400 hover:bg-blue-50/30 transition-colors bg-white min-w-[165px]">
-        <Network className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
-        <span className="flex-1 text-left text-slate-400">选择项目节点</span>
-        <ChevronDown className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
-      </button>
+      <TreeSelectDropdown
+        tree={TREE}
+        value={nodeId}
+        label={nodeLabel}
+        onChange={(id, lbl) => { setNodeId(id); setNodeLabel(lbl); }}
+      />
 
       <SearchInput placeholder="监测点位名称" value={name} onChange={setName} width="w-40" />
       <SearchInput placeholder="输入 S/N"      value={sn}   onChange={setSn}   width="w-36" />

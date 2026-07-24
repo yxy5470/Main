@@ -8,6 +8,11 @@ import { AlertList } from './components/AlertList';
 import { MapCard } from './components/MapCard';
 import { ProjectManagement } from './components/ProjectManagement';
 import { DeviceManagement } from './components/DeviceManagement';
+import { DeviceList } from './components/DeviceList';
+import { TaskCenter } from './components/TaskCenter';
+import { AccessModelManagement } from './components/AccessModelManagement';
+import { PushModelManagement } from './components/PushModelManagement';
+import { DataPush } from './components/DataPush';
 import { DataAnalysisPage } from './components/DataAnalysisPage';
 import { AlarmCenter } from './components/AlarmCenter';
 import { UserManagement } from './components/UserManagement';
@@ -21,19 +26,24 @@ import { FeedbackManagement } from './components/FeedbackManagement';
 import { AlarmRules } from './components/AlarmRules';
 import { AlarmNotification } from './components/AlarmNotification';
 
-type Page = 'home' | 'projects' | 'devices' | 'analysis' | 'alarm-center' | 'alarm-rules' | 'alarm-notification' | 'user-management' | 'role-management' | 'device-type' | 'data-type' | 'notice' | 'login-log' | 'op-log' | 'feedback';
+type Page = 'home' | 'projects' | 'devices' | 'device-list' | 'task-center' | 'data-push' | 'analysis' | 'alarm-center' | 'alarm-rules' | 'alarm-notification' | 'user-management' | 'role-management' | 'device-type' | 'access-model' | 'push-model' | 'data-type' | 'notice' | 'login-log' | 'op-log' | 'feedback';
 
 const PAGE_CONFIG: Record<Page, { label: string; breadcrumbs: { label: string }[] }> = {
   'home': { label: '首页', breadcrumbs: [{ label: '首页' }] },
   'projects': { label: '项目管理', breadcrumbs: [{ label: '首页' }, { label: '项目管理' }] },
   'devices': { label: '设备管理', breadcrumbs: [{ label: '首页' }, { label: '设备管理' }] },
+  'device-list': { label: '设备列表', breadcrumbs: [{ label: '首页' }, { label: '设备管理' }, { label: '设备列表' }] },
+  'task-center': { label: '任务中心', breadcrumbs: [{ label: '首页' }, { label: '设备管理' }, { label: '任务中心' }] },
+  'data-push':   { label: '数据推送', breadcrumbs: [{ label: '首页' }, { label: '设备管理' }, { label: '数据推送' }] },
   'analysis': { label: '监测数据与分析', breadcrumbs: [{ label: '首页' }, { label: '监测数据与分析' }] },
   'alarm-center': { label: '告警处理台', breadcrumbs: [{ label: '首页' }, { label: '告警中心' }, { label: '告警处理台' }] },
   'alarm-rules': { label: '告警规则', breadcrumbs: [{ label: '首页' }, { label: '告警中心' }, { label: '告警规则' }] },
   'alarm-notification': { label: '告警通知管理', breadcrumbs: [{ label: '首页' }, { label: '告警中心' }, { label: '告警通知管理' }] },
   'user-management': { label: '用户管理', breadcrumbs: [{ label: '首页' }, { label: '系统管理' }, { label: '用户管理' }] },
   'role-management': { label: '角色管理', breadcrumbs: [{ label: '首页' }, { label: '系统管理' }, { label: '角色管理' }] },
-  'device-type': { label: '设备类型管理', breadcrumbs: [{ label: '首页' }, { label: '系统管理' }, { label: '设备类型管理' }] },
+  'device-type':  { label: '设备类型管理', breadcrumbs: [{ label: '首页' }, { label: '系统管理' }, { label: '设备类型管理' }] },
+  'access-model': { label: '接入物模型',   breadcrumbs: [{ label: '首页' }, { label: '系统管理' }, { label: '接入物模型' }] },
+  'push-model':   { label: '推送物模型',   breadcrumbs: [{ label: '首页' }, { label: '系统管理' }, { label: '推送物模型' }] },
   'data-type': { label: '数据类型管理', breadcrumbs: [{ label: '首页' }, { label: '系统管理' }, { label: '数据类型管理' }] },
   'notice': { label: '通知公告', breadcrumbs: [{ label: '首页' }, { label: '系统管理' }, { label: '通知公告' }] },
   'login-log': { label: '登录日志', breadcrumbs: [{ label: '首页' }, { label: '系统管理' }, { label: '登录日志' }] },
@@ -141,6 +151,9 @@ export default function App() {
         {currentPage === 'projects' && <ProjectManagement />}
 
         {currentPage === 'devices' && <DeviceManagement />}
+        {currentPage === 'device-list' && <DeviceList />}
+        {currentPage === 'task-center' && <TaskCenter />}
+        {currentPage === 'data-push' && <DataPush />}
 
         {currentPage === 'analysis' && <DataAnalysisPage />}
         {currentPage === 'alarm-center' && <AlarmCenter />}
@@ -149,6 +162,8 @@ export default function App() {
         {currentPage === 'user-management' && <UserManagement />}
         {currentPage === 'role-management' && <RoleManagement />}
         {currentPage === 'device-type' && <DeviceTypeManagement />}
+        {currentPage === 'access-model' && <AccessModelManagement />}
+        {currentPage === 'push-model' && <PushModelManagement />}
         {currentPage === 'data-type' && <DataTypeManagement />}
         {currentPage === 'notice' && <NoticeManagement />}
         {currentPage === 'login-log' && <LoginLog />}

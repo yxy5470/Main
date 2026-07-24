@@ -3,9 +3,10 @@ import {
   Home, Layers, Activity, Settings, Bell, FolderOpen,
   ChevronDown, ChevronRight, AlertCircle, Users, Shield,
   Cpu, Database, Megaphone, FileText, ClipboardList, MessageSquare, ListTree, BellRing,
+  Server, ClipboardCheck, Share2, SendHorizonal, PlugZap,
 } from 'lucide-react';
 
-type Page = 'home' | 'projects' | 'devices' | 'analysis' | 'alarm-center' | 'alarm-rules' | 'alarm-notification' | 'user-management' | 'role-management' | 'device-type' | 'data-type' | 'notice' | 'login-log' | 'op-log' | 'feedback';
+type Page = 'home' | 'projects' | 'devices' | 'device-list' | 'task-center' | 'data-push' | 'analysis' | 'alarm-center' | 'alarm-rules' | 'alarm-notification' | 'user-management' | 'role-management' | 'device-type' | 'access-model' | 'push-model' | 'data-type' | 'notice' | 'login-log' | 'op-log' | 'feedback';
 
 interface SidebarProps {
   currentPage: Page;
@@ -15,7 +16,9 @@ interface SidebarProps {
 const SYSTEM_SUB: { icon: ReactNode; label: string; page?: Page }[] = [
   { icon: <Users className="w-4 h-4 flex-shrink-0" />,         label: '用户管理', page: 'user-management' },
   { icon: <Shield className="w-4 h-4 flex-shrink-0" />,        label: '角色管理', page: 'role-management' },
-  { icon: <Cpu className="w-4 h-4 flex-shrink-0" />,           label: '设备类型', page: 'device-type' },
+  { icon: <Cpu className="w-4 h-4 flex-shrink-0" />,           label: '设备类型',  page: 'device-type'   },
+  { icon: <PlugZap className="w-4 h-4 flex-shrink-0" />,       label: '接入物模型', page: 'access-model'  },
+  { icon: <Share2 className="w-4 h-4 flex-shrink-0" />,        label: '推送物模型', page: 'push-model'    },
   { icon: <Database className="w-4 h-4 flex-shrink-0" />,      label: '数据类型', page: 'data-type' },
   { icon: <Megaphone className="w-4 h-4 flex-shrink-0" />,     label: '通知公告', page: 'notice' },
   { icon: <FileText className="w-4 h-4 flex-shrink-0" />,      label: '登录日志', page: 'login-log' },
@@ -26,13 +29,17 @@ export function Sidebar({ currentPage, onNavigate }: SidebarProps) {
   const [alarmExpanded, setAlarmExpanded]   = useState(
     currentPage === 'alarm-center' || currentPage === 'alarm-rules' || currentPage === 'alarm-notification'
   );
+  const [deviceExpanded, setDeviceExpanded] = useState(
+    currentPage === 'device-list' || currentPage === 'task-center' || currentPage === 'data-push' || currentPage === 'devices'
+  );
   const [systemExpanded, setSystemExpanded] = useState(
     currentPage === 'user-management' || currentPage === 'role-management' ||
-    currentPage === 'device-type' || currentPage === 'data-type' || currentPage === 'notice' ||
-    currentPage === 'login-log' || currentPage === 'op-log'
+    currentPage === 'device-type' || currentPage === 'access-model' || currentPage === 'push-model' ||
+    currentPage === 'data-type' || currentPage === 'notice' || currentPage === 'login-log' || currentPage === 'op-log'
   );
 
   const isAlarmActive = currentPage === 'alarm-center' || currentPage === 'alarm-rules' || currentPage === 'alarm-notification';
+  const isDeviceActive = currentPage === 'device-list' || currentPage === 'task-center' || currentPage === 'data-push' || currentPage === 'devices';
 
   return (
     <aside className="w-64 bg-[#1E293B] flex flex-col h-full flex-shrink-0">
@@ -86,13 +93,33 @@ export function Sidebar({ currentPage, onNavigate }: SidebarProps) {
             />
           </ExpandableNav>
 
-          {/* 4. 设备管理 */}
-          <NavItem
-            icon={<Layers className="w-5 h-5" />}
+          {/* 4. 设备管理（可展开） */}
+          <ExpandableNav
+            icon={<Layers className="w-5 h-5 flex-shrink-0" />}
             label="设备管理"
-            active={currentPage === 'devices'}
-            onClick={() => onNavigate('devices')}
-          />
+            expanded={deviceExpanded}
+            parentActive={isDeviceActive}
+            onToggle={() => setDeviceExpanded(v => !v)}
+          >
+            <SubItem
+              icon={<Server className="w-4 h-4 flex-shrink-0" />}
+              label="设备列表"
+              active={currentPage === 'device-list'}
+              onClick={() => onNavigate('device-list')}
+            />
+            <SubItem
+              icon={<ClipboardCheck className="w-4 h-4 flex-shrink-0" />}
+              label="任务中心"
+              active={currentPage === 'task-center'}
+              onClick={() => onNavigate('task-center')}
+            />
+            <SubItem
+              icon={<SendHorizonal className="w-4 h-4 flex-shrink-0" />}
+              label="数据推送"
+              active={currentPage === 'data-push'}
+              onClick={() => onNavigate('data-push')}
+            />
+          </ExpandableNav>
 
           {/* 5. 项目管理 */}
           <NavItem
